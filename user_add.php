@@ -16,14 +16,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $department = trim($_POST['department']);
     $role       = $_POST['role'] ?? 'personel';
     $birthdate  = $_POST['birthdate'] ?? null;
+    $internal_phone = trim($_POST['internal_phone']);
+    $mobile_phone   = trim($_POST['mobile_phone']);
+    $hire_date  = $_POST['hire_date'] ?? null;
     $anydesk    = trim($_POST['anydesk']);
 
     if ($name && $email && $password) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, department, role, birthdate, anydesk) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, department, role, birthdate, internal_phone, mobile_phone, hire_date, anydesk) VALUES (?, ?, ?, ?, ?, ?, ? ,? , ? , ?)");
         try {
-            $stmt->execute([$name, $email, $hashedPassword, $department, $role, $birthdate, $anydesk]);
+            $stmt->execute([$name, $email, $hashedPassword, $department, $role, $birthdate, $internal_phone, $mobile_phone, $hire_date, $anydesk]);
             $success = "Kullanıcı başarıyla eklendi.";
         } catch (PDOException $e) {
             $error = "Hata oluştu: " . $e->getMessage();
@@ -89,6 +92,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="date" name="birthdate" class="form-control">
         </div>
 
+        <div class="mb-3">
+            <label class="form-label">Dahili Numara</label>
+            <input type="text" name="internal_phone" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Cep Telefonu</label>
+            <input type="text" name="mobile_phone" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">İşe Giriş Tarihi</label>
+            <input type="date" name="hire_date" class="form-control">
+        </div>
+        
         <div class="mb-3">
             <label class="form-label">Anydesk ID</label>
             <input type="text" name="anydesk" class="form-control">

@@ -19,9 +19,20 @@ if (!isset($user) || !is_array($user)) {
         <li class="nav-item">
             <a class="nav-link text-white" href="profile.php">👤 Profil</a>
         </li>
+
+        <li class="nav-item">
+            <a class="nav-link text-white" href="team.php">👥 Ekibimiz</a>
+        </li>
+
         <li class="nav-item">
             <a class="nav-link text-white" href="support.php">🆘 Destek</a>
         </li>
+
+        <?php if (isset($user['role']) && in_array($user['role'], ['it', 'manager'])): ?>
+            <li class="nav-item">
+                <a class="nav-link text-info" href="leave_approvals.php">📋 İzin Takibi</a>
+            </li>
+        <?php endif; ?>
 
         <?php if (isset($user['role']) && in_array($user['role'], ['it', 'manager'])): ?>
             <li class="nav-item">
@@ -43,10 +54,15 @@ if (!isset($user) || !is_array($user)) {
 
         <?php if (isset($user['role']) && $user['role'] === 'it'): ?>
             <li class="nav-item">
-                <a class="nav-link text-warning" href="it_requests.php">🛠️ IT Talepleri</a>
+                <a class="nav-link text-warning" href="device_add.php">🛠️ Cihaz Ekle</a>
             </li>
         <?php endif; ?>
 
+        <?php if (isset($user['role']) && $user['role'] === 'it'): ?>
+            <li class="nav-item">
+                <a class="nav-link text-warning" href="it_requests.php">🛠️ IT Talepleri</a>
+            </li>
+        <?php endif; ?>
 
 
         <?php if (isset($user['role']) && $user['role'] === 'it'): ?>

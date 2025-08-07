@@ -29,17 +29,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $department = trim($_POST['department']);
     $role       = $_POST['role'] ?? 'personel';
     $birthdate  = $_POST['birthdate'] ?? null;
+    $internal_phone = trim($_POST['internal_phone']);
+    $mobile_phone   = trim($_POST['mobile_phone']);
     $anydesk    = trim($_POST['anydesk']);
     $password   = $_POST['password'] ?? '';
+    $hire_date  = $_POST['hire_date'] ?? null;
 
     if ($name && $email) {
         if ($password) {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $updateStmt = $pdo->prepare("UPDATE users SET name=?, email=?, password=?, department=?, role=?, birthdate=?, anydesk=? WHERE id=?");
-            $updateStmt->execute([$name, $email, $hashedPassword, $department, $role, $birthdate, $anydesk, $userId]);
+            $updateStmt = $pdo->prepare("UPDATE users SET name=?, email=?, password=?, department=?, role=?, birthdate=?, internal_phone=?, mobile_phone=?,anydesk=? , hire_date=? WHERE id=?");
+            $updateStmt->execute([$name, $email, $hashedPassword, $department, $role, $birthdate, $internal_phone, $mobile_phone, $anydesk, $hire_date, $userId]);
         } else {
-            $updateStmt = $pdo->prepare("UPDATE users SET name=?, email=?, department=?, role=?, birthdate=?, anydesk=? WHERE id=?");
-            $updateStmt->execute([$name, $email, $department, $role, $birthdate, $anydesk, $userId]);
+            $updateStmt = $pdo->prepare("UPDATE users SET name=?, email=?, department=?, role=?, birthdate=?, internal_phone=?, mobile_phone=?, anydesk=?, hire_date=? WHERE id=?");
+            $updateStmt->execute([$name, $email, $department, $role, $birthdate, $internal_phone, $mobile_phone, $anydesk, $hire_date, $userId]);
         }
         $success = "Kullanıcı bilgileri güncellendi.";
     } else {
@@ -101,6 +104,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3">
             <label class="form-label">Doğum Tarihi</label>
             <input type="date" name="birthdate" class="form-control" value="<?= $user['birthdate'] ?>">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Dahili Numara</label>
+            <input type="text" name="internal_phone" class="form-control" value="<?= htmlspecialchars($user['internal_phone']) ?>">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Cep Telefonu</label>
+            <input type="text" name="mobile_phone" class="form-control" value="<?= htmlspecialchars($user['mobile_phone']) ?>">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">İşe Giriş Tarihi</label>
+            <input type="date" name="hire_date" class="form-control" value="<?= $user['hire_date'] ?>">
         </div>
 
         <div class="mb-3">

@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 require_once 'includes/db.php';
+require_once 'includes/functions.php';
 $user = $_SESSION['user'];
 
 // Güncel kullanıcı bilgisi (anydesk dahil)
@@ -50,8 +51,71 @@ $devices = $stmt->fetchAll();
         <p><strong>Rol:</strong> <?= htmlspecialchars($userData['role']) ?></p>
         <p><strong>Doğum Günü:</strong> <?= date('d.m.Y', strtotime($userData['birthdate'])) ?></p>
         <p><strong>Anydesk:</strong> <?= htmlspecialchars($userData['anydesk'] ?? 'Belirtilmemiş') ?></p>
+        <?php
+            $remainingLeaveDays = getCurrentLeaveBalance($pdo, $userData['id'], $userData['hire_date']);
+        ?>
+        <p><strong>Kalan Yıllık İzin:</strong> <?= $remainingLeaveDays ?> gün</p>
+        
     </div>
 
+    <a href="leave_request.php" class="btn btn-success mb-3">➕ İzin Al</a>
+
+    <?php
+$stmt = $pdo->prepare("
+    SELECT l.*, lt.name AS type_name, u.name AS approver_name
+    FROM leaves l
+    JOIN leave_types lt ON l.leave_type_id = lt.id
+    LEFT JOIN users u ON l.approved_by = u.id
+    WHERE l.user_id = ?
+    ORDER BY l.created_at DESC
+");
+$stmt->execute([$user['id']]);
+$leaves = $stmt->fetchAll();
+?>
+
+<div class="card p-4 mt-4 shadow-sm">
+    <h5 class="mb-3">📅 İzin Geçmişi</h5>
+    <?php if (count($leaves) === 0): ?>
+        <p class="text-muted">Henüz izin başvurusu yapılmamış.</p>
+    <?php else: ?>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>İzin Türü</th>
+                        <th>Tarih Aralığı</th>
+                        <th>Toplam Gün</th>
+                        <th>Durum</th>
+                        <th>Onaylayan</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($leaves as $leave): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($leave['type_name']) ?></td>
+                            <td><?= date('d.m.Y', strtotime($leave['start_date'])) ?> - <?= date('d.m.Y', strtotime($leave['end_date'])) ?></td>
+                            <td><?= $leave['total_days'] ?></td>
+                            <td>
+                                <?php if ($leave['status'] === 'approved'): ?>
+                                    <span class="badge bg-success">Onaylandı</span>
+                                <?php elseif ($leave['status'] === 'rejected'): ?>
+                                    <span class="badge bg-danger">Reddedildi</span>
+                                <?php else: ?>
+                                    <span class="badge bg-warning text-dark">Beklemede</span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= $leave['approver_name'] ?? '-' ?></td>
+                            <td><?= htmlspecialchars($leave['reason']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+</div>
+
+<br><br>
     <div class="card p-4 shadow-sm">
         <h5 class="mb-3">🖥️ Teslim Alınan Cihazlar</h5>
         <?php if (count($devices) === 0): ?>

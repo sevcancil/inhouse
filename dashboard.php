@@ -6,6 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 require_once 'includes/db.php';
+require_once 'includes/functions.php';
 $user = $_SESSION['user'];
 
 // Son 5 duyuruyu al
@@ -49,37 +50,51 @@ $recentTasks = $stmt->fetchAll();
 <?php include 'includes/navbar.php'; ?>
 
 
-<div class="card mb-4">
-    <div class="card-header bg-secondary text-white">
-        📌 Son Görevleriniz
-    </div>
-    <ul class="list-group list-group-flush">
-        <?php if (count($recentTasks) === 0): ?>
-            <li class="list-group-item">Henüz görev atanmadı.</li>
-        <?php else: ?>
-            <?php foreach ($recentTasks as $task): ?>
-                <li class="list-group-item d-flex justify-content-between">
-                    <?= htmlspecialchars($task['title']) ?>
-                    <span class="badge bg-<?= match($task['status']) {
-                        'bekliyor' => 'secondary',
-                        'devam ediyor' => 'info',
-                        'tamamlandı' => 'success',
-                        default => 'light'
-                    } ?>"><?= $task['status'] ?></span>
-                </li>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </ul>
-    <div class="card-footer text-end">
-        <a href="tasks.php" class="btn btn-sm btn-outline-primary">Tüm Görevler</a>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    📌 Son Görevleriniz
+                </div>
+                <div class="card-body">
+                    <?php if (count($recentTasks) === 0): ?>
+                        <p class="text-muted">Henüz görev atanmadı.</p>
+                    <?php else: ?>
+                        <div class="list-group">
+                            <?php foreach ($recentTasks as $task): ?>
+                                <div class="list-group-item d-flex justify-content-between align-items-center rounded shadow-sm mb-2 border-0" style="background-color: #f8f9fa;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-clipboard-check text-primary fs-5"></i>
+                                        <strong><?= htmlspecialchars($task['title']) ?></strong>
+                                    </div>
+                                    <span class="badge rounded-pill px-3 py-2 text-capitalize bg-<?= match($task['status']) {
+                                        'bekliyor' => 'secondary',
+                                        'devam ediyor' => 'info',
+                                        'tamamlandı' => 'success',
+                                        default => 'light'
+                                    } ?>">
+                                        <?= $task['status'] ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="tasks.php" class="btn btn-sm btn-outline-primary">Tüm Görevler</a>
+                </div>
+            </div>
+
+            <?php if (in_array($user['role'], ['manager', 'it'])): ?>
+                <div class="mb-3 text-end">
+                    <a href="tasks.php" class="btn btn-primary">➕ Yeni Görev Ata</a>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
-<?php if (in_array($user['role'], ['manager', 'it'])): ?>
-    <div class="mb-3">
-        <a href="tasks.php" class="btn btn-primary">➕ Yeni Görev Ata</a>
-    </div>
-<?php endif; ?>
 
 <div class="container mt-4">
 

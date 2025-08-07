@@ -1,13 +1,15 @@
 <?php
 session_start();
 require_once 'includes/db.php';
+require_once 'includes/functions.php';
+
 
 if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['manager', 'it'])) {
     die("Bu sayfaya erişim yetkiniz yok.");
 }
 
 // Tüm kullanıcıları al
-$stmt = $pdo->query("SELECT id, name, email, department, role, birthdate, anydesk, created_at FROM users ORDER BY created_at DESC");
+$stmt = $pdo->query("SELECT id, name, email, department, role, birthdate, anydesk, internal_phone, mobile_phone, hire_date, created_at FROM users ORDER BY created_at DESC");
 $users = $stmt->fetchAll();
 ?>
 
@@ -41,8 +43,11 @@ $users = $stmt->fetchAll();
                 <th>Departman</th>
                 <th>Rol</th>
                 <th>Doğum Tarihi</th>
+                <th>Dahili</th>
+                <th>Cep No</th>
                 <th>Anydesk</th>
-                <th>Oluşturulma</th>
+                <th>İşe Giriş Tarihi</th>
+                <th>Kalan İzin</th>
                 <th>İşlemler</th>
             </tr>
         </thead>
@@ -54,8 +59,16 @@ $users = $stmt->fetchAll();
                     <td><?= htmlspecialchars($user['department']) ?></td>
                     <td><?= htmlspecialchars($user['role']) ?></td>
                     <td><?= htmlspecialchars($user['birthdate']) ?></td>
+                    <td><?= htmlspecialchars($user['internal_phone'] ?? '-') ?></td>
+                    <td><?= htmlspecialchars($user['mobile_phone'] ?? '-') ?></td>
                     <td><?= htmlspecialchars($user['anydesk']) ?></td>
-                    <td><?= date('d.m.Y H:i', strtotime($user['created_at'])) ?></td>
+                    <td><?= htmlspecialchars($user['hire_date']) ?></td>
+                    <td>
+                        <?php
+                        echo getCurrentLeaveBalance($pdo, $user['id'], $user['hire_date']) . ' gün';
+                        ?>
+                    </td>
+
                     <td>
                         <a href="user_edit.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-primary">Düzenle</a>
                         <a href="user_delete.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')">Sil</a>
